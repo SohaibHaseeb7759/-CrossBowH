@@ -1,0 +1,41 @@
+---
+/**
+ * #CrossBowH mark — a hash sign built from crossbow parts:
+ * the top bar is the bow limb, the two rails form the stock,
+ * the lower bar is the latch plate, and a bolt flies through the centre.
+ * Uses currentColor, so it follows the surrounding text colour.
+ */
+interface Props {
+  size?: number | string;
+  class?: string;
+  /** Accessible title. Omit when the brand name is shown next to the mark. */
+  title?: string;
+}
+const { size = 32, class: className, title } = Astro.props;
+---
+<svg
+  class:list={['crossbow-logo', className]}
+  width={size}
+  height={size}
+  viewBox="0 0 64 64"
+  fill="none"
+  stroke="currentColor"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  xmlns="http://www.w3.org/2000/svg"
+  role={title ? 'img' : undefined}
+  aria-hidden={title ? undefined : 'true'}
+  aria-label={title}
+>
+  {title && <title>{title}</title>}
+  <!-- bow limb (top bar of the hash) -->
+  <path d="M5 25 Q32 9 59 25" stroke-width="5" />
+  <!-- stock rails (the two strokes of the hash) -->
+  <path d="M21 17 V59 M43 17 V59" stroke-width="5" />
+  <!-- latch plate (lower bar of the hash) -->
+  <path d="M9 42 H55" stroke-width="5" />
+  <!-- bolt -->
+  <path d="M32 52 V14" stroke-width="3.5" />
+  <path d="M32 2.5 L38.5 14 H25.5 Z" fill="currentColor" stroke-width="2" />
+  <path d="M27.5 57 L32 52 L36.5 57" stroke-width="3" />
+</svg>

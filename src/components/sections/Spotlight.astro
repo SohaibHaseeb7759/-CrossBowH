@@ -1,0 +1,60 @@
+---
+/** Emblem art on the left, newest blog post on the right — the reference homepage's hero row. */
+import Emblem from '../ui/Emblem.astro';
+import Icon from '../ui/Icon.astro';
+import { blogPosts } from '../../data/blogPosts';
+import { formatDate, visible } from '../../lib/content';
+
+const latest = [...visible(blogPosts)].sort((a, b) => b.date.localeCompare(a.date))[0];
+---
+<div class="spotlight__art">
+  <Emblem />
+</div>
+
+<div class="spotlight__post">
+  <span class="spotlight__label"><Icon name="newspaper-clipping" /> Latest Post</span>
+  {latest ? (
+    <article>
+      <h2 class="spotlight__title">
+        {latest.url ? <a href={latest.url}>{latest.title}</a> : <span>{latest.title}</span>}
+        {latest.placeholder && <span class="placeholder-flag">sample</span>}
+      </h2>
+      <time class="spotlight__date" datetime={latest.date}>{formatDate(latest.date)}</time>
+      <p class="spotlight__excerpt">{latest.excerpt}</p>
+      {latest.url && <a href={latest.url}>Read more...</a>}
+    </article>
+  ) : (
+    <div class="spotlight__empty">
+      <p class="spotlight__excerpt">Nothing published yet — the first write-up is on its way. <a href="#contact">Say hi</a> in the meantime.</p>
+    </div>
+  )}
+</div>
+
+<style>
+  .spotlight__art {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 10%;
+  }
+  .spotlight__label { font-size: 1.2em; }
+  .spotlight__title {
+    font-size: 30px;
+    margin: 10px 0 0;
+  }
+  .spotlight__date {
+    display: block;
+    font-size: 0.85em;
+    font-style: italic;
+    color: var(--light-font-color);
+    margin-bottom: 18px;
+  }
+  .spotlight__excerpt {
+    border-left: 1px solid var(--light-font-color);
+    padding-left: 8px;
+  }
+  .spotlight__empty { margin-top: 18px; }
+  @media (max-width: 768px) {
+    .spotlight__art { padding: 0 12%; }
+  }
+</style>

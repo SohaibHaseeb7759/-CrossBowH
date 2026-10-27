@@ -1,0 +1,188 @@
+---
+import Wordmark from './ui/Wordmark.astro';
+import Icon from './ui/Icon.astro';
+import { navigation, socials, site } from '../config/site';
+
+const visibleSocials = socials.filter((s) => s.url);
+---
+<header class="site-header">
+  <div class="menu" data-menu>
+    <button
+      class="menu__toggle"
+      type="button"
+      aria-expanded="false"
+      aria-controls="site-menu"
+      aria-label="Open menu"
+      data-menu-toggle
+    >
+      <span></span><span></span><span></span>
+    </button>
+    <nav id="site-menu" class="menu__panel" aria-label="Main" hidden data-menu-panel>
+      <ul>
+        <li class="menu__section">Main</li>
+        {navigation.map((item) => (
+          <li><a href={item.href}><Icon name={item.icon} /> {item.label}</a></li>
+        ))}
+        <li>
+          <button type="button" class="menu__theme" data-theme-toggle>
+            <Icon name="swatches" /> Theme: <span data-theme-label>dark</span>
+          </button>
+        </li>
+        {visibleSocials.length > 0 && <li class="menu__section">Elsewhere</li>}
+        {visibleSocials.map((s) => (
+          <li><a href={s.url} rel="me noopener" target="_blank"><Icon name={s.icon} /> {s.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+
+  <a href="#top" class="site-header__brand nounder" aria-label={`${site.brand} — back to top`}>
+    <Wordmark />
+  </a>
+
+  <button type="button" class="site-header__theme" data-theme-toggle aria-label="Switch colour theme">
+    <Icon name="swatches" />
+  </button>
+</header>
+
+<style>
+  .site-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin: 20px 10px 10px;
+    position: relative;
+    z-index: 20;
+  }
+  .site-header__brand {
+    color: var(--brand-color);
+    position: relative;
+    left: 10px;
+    min-width: 0;
+  }
+  .site-header__brand:hover { color: var(--brand-color); opacity: 0.85; }
+
+  .site-header__theme {
+    background: none;
+    border: 0;
+    padding: 2px;
+    color: var(--font-color);
+    cursor: pointer;
+    font-size: 22px;
+    line-height: 1;
+  }
+  .site-header__theme:hover { color: var(--link-hover-color); }
+
+  /* Hamburger — three bars that turn into an accent-coloured X (as in the reference) */
+  .menu { position: relative; }
+  .menu__toggle {
+    display: block;
+    width: 34px;
+    height: 32px;
+    padding: 5px 3px;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+  .menu__toggle span {
+    display: block;
+    width: 27px;
+    height: 3px;
+    margin: 4px 0;
+    background: var(--font-color);
+    border-radius: 3px;
+    transform-origin: 4px 0;
+    transition: transform 0.5s cubic-bezier(0.77, 0.2, 0.05, 1), background 0.5s cubic-bezier(0.77, 0.2, 0.05, 1), opacity 0.55s ease;
+  }
+  .menu__toggle span:first-child { transform-origin: 0% 0%; }
+  .menu__toggle span:last-child { transform-origin: 0% 100%; }
+  .menu__toggle[aria-expanded='true'] span { background: var(--link-hover-color); }
+  .menu__toggle[aria-expanded='true'] span:first-child { transform: translate(3px, -1px) rotate(45deg); }
+  .menu__toggle[aria-expanded='true'] span:nth-child(2) { opacity: 0; transform: scale(0.2); }
+  .menu__toggle[aria-expanded='true'] span:last-child { transform: translate(3px, 1px) rotate(-45deg); }
+
+  .menu__panel {
+    position: absolute;
+    left: -10px;
+    top: 100%;
+    margin-top: 10px;
+    width: 220px;
+    padding: 10px;
+    background: var(--light-background-color);
+    color: var(--font-color);
+    border-radius: var(--radius);
+    max-height: 80vh;
+    overflow: auto;
+    overscroll-behavior: contain;
+    box-shadow: 0 6px 24px rgb(0 0 0 / 0.35);
+  }
+  .menu__panel ul { list-style: none; margin: 0; padding: 0; }
+  .menu__panel li { margin: 2px 0; }
+  .menu__section {
+    color: var(--light-font-color);
+    font-weight: 900;
+  }
+  .menu__section:not(:first-child) { margin-top: 20px !important; }
+  .menu__panel a,
+  .menu__theme {
+    color: var(--contrast-font-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  .menu__theme {
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    text-align: left;
+  }
+  .menu__panel a:hover,
+  .menu__theme:hover { color: var(--link-hover-color); }
+</style>
+
+<script>
+  const THEMES = ['dark', 'light', 'classic'] as const;
+  type Theme = (typeof THEMES)[number];
+
+  const root = document.documentElement;
+  const labels = document.querySelectorAll<HTMLElement>('[data-theme-label]');
+  const syncLabel = () => labels.forEach((l) => (l.textContent = root.dataset.theme ?? 'dark'));
+  syncLabel();
+
+  document.querySelectorAll('[data-theme-toggle]').forEach((btn) =>
+    btn.addEventListener('click', () => {
+      const current = (root.dataset.theme as Theme) ?? 'dark';
+      const next = THEMES[(THEMES.indexOf(current) + 1) % THEMES.length];
+      root.dataset.theme = next;
+      try { localStorage.setItem('crossbowh-theme', next); } catch {}
+      syncLabel();
+    }),
+  );
+
+  const menu = document.querySelector<HTMLElement>('[data-menu]');
+  const toggle = menu?.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const panel = menu?.querySelector<HTMLElement>('[data-menu-panel]');
+
+  if (menu && toggle && panel) {
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      panel.hidden = !open;
+    };
+    toggle.addEventListener('click', () => setOpen(panel.hidden));
+    panel.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('a')) setOpen(false);
+    });
+    document.addEventListener('click', (e) => {
+      if (!panel.hidden && !menu.contains(e.target as Node)) setOpen(false);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !panel.hidden) {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+  }
+</script>

@@ -1,0 +1,29 @@
+---
+import Card from '../ui/Card.astro';
+import ContactForm from '../ui/ContactForm.astro';
+import LinkList from '../ui/LinkList.astro';
+import SectionHeading from '../ui/SectionHeading.astro';
+import { contact, socials } from '../../config/site';
+import type { SocialLink } from '../../types';
+
+const links: SocialLink[] = [
+  { label: 'Email me', url: contact.email ? `mailto:${contact.email}` : '', icon: 'envelope', handle: contact.email || '[YOUR_EMAIL]' },
+  ...socials,
+];
+---
+<section class="contain section" aria-labelledby="contact-title">
+  <SectionHeading id="contact-title" title="Contact" icon="chat-circle-dots" />
+
+  <Card variant="neutral" title={contact.heading} icon="chat-circle-dots">
+    <p class="contact__intro">{contact.text}</p>
+    <LinkList links={links} />
+  </Card>
+
+  <Card variant="outline" title="Send a message" icon="paper-plane-tilt">
+    <ContactForm />
+  </Card>
+</section>
+
+<style>
+  .contact__intro { margin: 4px 0 0; }
+</style>

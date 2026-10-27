@@ -1,0 +1,31 @@
+---
+/**
+ * Accent double rule with a small notch sitting on it — the reference's "fin" divider,
+ * with the shark fin replaced by a #CrossBowH bolt tip.
+ */
+interface Props { class?: string }
+---
+<div class:list={['fin', Astro.props.class]} role="separator">
+  <svg class="fin__tip" viewBox="0 0 36 24" aria-hidden="true">
+    <path d="M18 1 L33 23 H22 L18 16 L14 23 H3 Z" />
+  </svg>
+</div>
+
+<style>
+  .fin {
+    position: relative;
+    margin: 40px 0;
+    height: 0;
+    border-top: 1px solid var(--accent-color);
+    border-bottom: 1px solid var(--accent-color);
+    opacity: 0.6;
+  }
+  .fin__tip {
+    position: absolute;
+    left: 40%;
+    bottom: 1px;
+    width: 30px;
+    height: 20px;
+    fill: var(--accent-color);
+  }
+</style>

@@ -1,0 +1,33 @@
+---
+import Card from '../ui/Card.astro';
+import PostEntry from '../ui/PostEntry.astro';
+import SectionHeading from '../ui/SectionHeading.astro';
+import { blogPosts } from '../../data/blogPosts';
+import { socials } from '../../config/site';
+import { formatShortDate, visible } from '../../lib/content';
+
+const posts = [...visible(blogPosts)].sort((a, b) => b.date.localeCompare(a.date));
+const rss = socials.find((s) => s.icon === 'rss' && s.url);
+const lastUpdated = posts[0] && !posts[0].placeholder ? `updated ${formatShortDate(posts[0].date)}` : undefined;
+---
+<section class="contain section" aria-labelledby="blog-title">
+  <SectionHeading id="blog-title" title="Blog" icon="article" meta={lastUpdated} />
+
+  <Card
+    wide
+    tone="var(--tone-notes)"
+    description="Write-ups, research notes and things I'm learning."
+  >
+    {rss && <p class="blog__rss">Subscribe <a href={rss.url}>via RSS</a>.</p>}
+    {posts.length === 0 ? (
+      <p class="blog__empty">No posts published yet — check back soon.</p>
+    ) : (
+      posts.map((post) => <PostEntry post={post} />)
+    )}
+  </Card>
+</section>
+
+<style>
+  .blog__rss { font-size: 0.85em; margin: -8px 0 4px; }
+  .blog__empty { font-style: italic; margin: 6px 0; }
+</style>

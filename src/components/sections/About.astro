@@ -1,0 +1,114 @@
+---
+import Card from '../ui/Card.astro';
+import Icon from '../ui/Icon.astro';
+import SectionHeading from '../ui/SectionHeading.astro';
+import TagList from '../ui/TagList.astro';
+import { about, person } from '../../config/site';
+import { skills } from '../../data/skills';
+import { experience as allExperience } from '../../data/experience';
+import { certifications as allCertifications } from '../../data/certifications';
+import { isPlaceholderText, spanLast, visible, withName } from '../../lib/content';
+import { site } from '../../config/site';
+
+const skillGroups = skills.filter((g) => g.items.length > 0);
+const experience = visible(allExperience);
+const certifications = visible(allCertifications);
+
+// Optional cards: whichever exist are laid out two per row; an odd last one spans the row.
+const extras = [
+  skillGroups.length > 0 && 'skills',
+  experience.length > 0 && 'experience',
+  certifications.length > 0 && 'certifications',
+].filter(Boolean) as string[];
+const wide = (key: string) => spanLast(extras.indexOf(key), extras.length);
+const showLocation = person.location && (site.showPlaceholders || !isPlaceholderText(person.location));
+---
+<section class="contain section" aria-labelledby="about-title">
+  <SectionHeading id="about-title" title="About" icon="identification-card" />
+
+  <Card variant="neutral">
+    <h3 class="shell">{about.heading}</h3>
+    {about.paragraphs.map((p) => (
+      <p>{withName(p).map((part) => (part.isName ? <span class="accent">{part.text}</span> : part.text))}</p>
+    ))}
+    {showLocation && <p class="muted about__location"><Icon name="globe" /> {person.location}</p>}
+  </Card>
+
+  <Card variant="outline">
+    <h3 class="shell">{about.siteHeading}</h3>
+    <p>{about.siteText}</p>
+    {about.specialties.length > 0 && (
+      <>
+        <p class="about__label">Interests &amp; specialties</p>
+        <TagList items={about.specialties} label="Specialties" />
+      </>
+    )}
+    {about.resumeUrl && (
+      <p><Icon name="article" /> A digital version of my résumé is available <a href={about.resumeUrl}>here</a>.</p>
+    )}
+    <p><Icon name="hand-waving" /> Wanna get in touch or just say <a href="#contact">hello</a>?</p>
+  </Card>
+
+  {skillGroups.length > 0 && (
+    <Card title="Skills & Tools" icon="terminal-window" tone="var(--tone-devlogs)" description="The things I work with." wide={wide('skills')}>
+      <dl class="skills">
+        {skillGroups.map((g) => (
+          <div class="skills__group">
+            <dt>{g.label}</dt>
+            <dd><TagList items={g.items} label={g.label} /></dd>
+          </div>
+        ))}
+      </dl>
+    </Card>
+  )}
+
+  {experience.length > 0 && (
+    <Card title="Experience" icon="briefcase" tone="var(--tone-captain)" description="Where I've been and what I've done." wide={wide('experience')}>
+      <ol class="timeline">
+        {experience.map((e) => (
+          <li>
+            <span class="timeline__role">{e.url ? <a href={e.url}>{e.role}</a> : e.role}</span>
+            <span class="muted"> @ {e.organization}</span>
+            {e.placeholder && <span class="placeholder-flag">sample</span>}
+            <span class="mono-date timeline__period"> • {e.period}</span>
+            {e.summary && <p class="timeline__summary">{e.summary}</p>}
+          </li>
+        ))}
+      </ol>
+    </Card>
+  )}
+
+  {certifications.length > 0 && (
+    <Card title="Certifications & Achievements" icon="seal-check" tone="var(--tone-scrolls)" description="Credentials I hold." wide={wide('certifications')}>
+      <ul class="certs">
+        {certifications.map((c) => (
+          <li>
+            {c.verifyUrl ? <a href={c.verifyUrl}>{c.name}</a> : <span>{c.name}</span>}
+            <span class="muted"> — {c.issuer}</span>
+            {c.year && <span class="mono-date"> • {c.year}</span>}
+            {c.placeholder && <span class="placeholder-flag">sample</span>}
+          </li>
+        ))}
+      </ul>
+    </Card>
+  )}
+</section>
+
+<style>
+  .shell {
+    font-family: var(--font-code);
+    font-weight: 700;
+    font-size: 1em;
+    margin: 6px 0 4px;
+  }
+  .about__label { margin: 0; font-size: 0.85em; color: var(--light-font-color); }
+  .about__location { font-size: 0.9em; }
+  .skills { margin: 0; }
+  .skills__group { margin-bottom: 6px; }
+  .skills dt { font-size: 0.9em; }
+  .skills dd { margin: 0; }
+  .timeline, .certs { list-style: none; padding: 0; margin: 0; }
+  .timeline li { padding-left: 10px; border-left: 2px solid color-mix(in srgb, var(--tone) 55%, transparent); margin-bottom: 10px; }
+  .timeline__summary { margin: 2px 0 0; font-size: 0.9em; color: var(--light-font-color); }
+  .certs li { margin: 3px 0; }
+</style>

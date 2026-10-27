@@ -1,0 +1,42 @@
+---
+/** Section title with the reference's oversized accent full stop. */
+import Icon from './Icon.astro';
+import type { IconName } from '../../types';
+interface Props { title: string; icon?: IconName; meta?: string; id?: string }
+const { title, icon, meta, id } = Astro.props;
+---
+<div class="section-heading twox">
+  <h2 id={id}>
+    {icon && <Icon name={icon} class="section-heading__icon" />}
+    {title}<span class="section-heading__dot" aria-hidden="true">.</span>
+  </h2>
+  {meta && <span class="section-heading__meta">{meta}</span>}
+</div>
+
+<style>
+  .section-heading {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+  }
+  h2 {
+    font-size: 35px;
+    margin: 0;
+    line-height: 1.2;
+  }
+  .section-heading__icon { color: var(--light-font-color); margin-right: 6px; vertical-align: -0.15em; width: 1em; height: 1em; }
+  .section-heading__dot {
+    color: var(--tone-posts);
+    font-size: 1.6em;
+    line-height: 0;
+  }
+  .section-heading__meta {
+    color: var(--light-font-color);
+    font-size: 0.85em;
+    font-style: italic;
+  }
+  @media (max-width: 768px) {
+    h2 { font-size: 28px; }
+  }
+</style>

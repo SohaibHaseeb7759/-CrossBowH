@@ -1,0 +1,58 @@
+---
+import Card from './Card.astro';
+import Icon from './Icon.astro';
+import TagList from './TagList.astro';
+import type { Project } from '../../types';
+interface Props { project: Project; wide?: boolean }
+const { project: p, wide = false } = Astro.props;
+const primaryUrl = p.liveUrl || p.githubUrl;
+---
+<Card as="article" tone="var(--tone-posts)" wide={wide} class:list={['project', { 'project--wide': wide && !!p.image }]}>
+  {p.image && (
+    <img class="project__image" src={p.image} alt={p.imageAlt ?? ''} loading="lazy" decoding="async" width="640" height="360" />
+  )}
+  <div class="project__body">
+    <h3 class="project__title">
+      <Icon name="folder" />{' '}
+      {primaryUrl ? <a href={primaryUrl}>{p.title}</a> : <span>{p.title}</span>}
+      {p.placeholder && <span class="placeholder-flag">sample</span>}
+    </h3>
+    {(p.category || p.featured) && (
+      <p class="project__meta">
+        {p.category}
+        {p.category && p.featured && ' • '}
+        {p.featured && <span><Icon name="star" /> featured</span>}
+      </p>
+    )}
+    <p class="project__desc">{p.description}</p>
+    <TagList items={p.technologies} label="Technologies" />
+    {(p.githubUrl || p.liveUrl) && (
+      <p class="project__links">
+        {p.githubUrl && <a href={p.githubUrl} rel="noopener" target="_blank"><Icon name="github-logo" /> Source</a>}
+        {p.liveUrl && <a href={p.liveUrl} rel="noopener" target="_blank"><Icon name="arrow-up-right" /> Live demo</a>}
+      </p>
+    )}
+  </div>
+</Card>
+
+<style>
+  .project { display: flex; flex-direction: column; transition: border-color 0.2s ease; }
+  .project:hover { border-color: color-mix(in srgb, var(--tone) 66%, var(--background-color)); }
+  .project--wide { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 16px; align-items: start; }
+  .project__image {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: var(--radius);
+    margin: 5px 0 8px;
+    background: var(--light-background-color);
+  }
+  .project__title { font-size: 1.2em; font-weight: 400; margin: 0; line-height: 1.5; }
+  .project__meta { font-size: 0.8em; font-style: italic; color: var(--light-font-color); margin: 0 0 8px; }
+  .project__meta .icon { width: 1em; height: 1em; vertical-align: -0.1em; }
+  .project__desc { margin-bottom: 6px; }
+  .project__links { display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 4px 0 0; font-size: 0.9em; }
+  @media (max-width: 768px) {
+    .project--wide { display: flex; }
+  }
+</style>

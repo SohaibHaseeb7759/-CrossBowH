@@ -1,0 +1,22 @@
+---
+/** Italic gradient tags, as used for topics on the reference homepage. */
+interface Props { items?: string[]; label?: string }
+const { items = [], label = 'Tags' } = Astro.props;
+---
+{items.length > 0 && (
+  <ul class="tags" aria-label={label}>
+    {items.map((t) => <li class="gradient-text">{t}</li>)}
+  </ul>
+)}
+<style>
+  .tags {
+    list-style: none;
+    margin: 4px 0 8px;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 12px;
+    font-size: 0.8em;
+    font-style: italic;
+  }
+</style>

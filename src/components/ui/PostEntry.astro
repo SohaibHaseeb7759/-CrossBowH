@@ -1,0 +1,46 @@
+---
+/** Blog archive entry, modelled on the reference's /blogs listing. */
+import type { BlogPost } from '../../types';
+import { formatDate } from '../../lib/content';
+interface Props { post: BlogPost }
+const { post } = Astro.props;
+const tags = [post.category, ...(post.tags ?? []).map((t) => `#${t}`)].filter(Boolean).join(' ');
+---
+<article class="post">
+  <h3 class="post__title">
+    {post.url ? <a href={post.url}>{post.title}</a> : <span>{post.title}</span>}
+    {post.placeholder && <span class="placeholder-flag">sample</span>}
+  </h3>
+  <time class="post__date" datetime={post.date}>{formatDate(post.date)}</time>
+  <div class:list={['post__excerpt', { 'post__excerpt--thumb': !!post.thumbnail }]}>
+    {post.thumbnail && (
+      <img src={post.thumbnail} alt={post.thumbnailAlt ?? ''} loading="lazy" decoding="async" width="320" height="180" />
+    )}
+    <p>{post.excerpt}</p>
+  </div>
+  {tags && <div class="post__tags">{tags}</div>}
+</article>
+
+<style>
+  .post + .post { margin-top: 28px; }
+  .post__title { font-size: 26px; margin: 10px 0 4px; }
+  .post__date {
+    display: block;
+    font-size: 0.85em;
+    font-style: italic;
+    color: var(--light-font-color);
+    margin-bottom: 10px;
+  }
+  .post__excerpt {
+    border-left: 0.1rem solid var(--light-font-color);
+    padding-left: 8px;
+  }
+  .post__excerpt p { margin-bottom: 8px; }
+  .post__excerpt--thumb { display: grid; grid-template-columns: 200px 1fr; gap: 14px; align-items: start; }
+  .post__excerpt img { border-radius: var(--radius); aspect-ratio: 16 / 9; object-fit: cover; }
+  .post__tags { font-size: 0.85em; color: var(--light-font-color); font-style: italic; }
+  @media (max-width: 600px) {
+    .post__title { font-size: 22px; }
+    .post__excerpt--thumb { grid-template-columns: 1fr; }
+  }
+</style>

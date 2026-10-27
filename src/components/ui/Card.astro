@@ -1,0 +1,80 @@
+---
+/**
+ * Board card in the reference style.
+ *  - variant "tint":    colour-tinted background + 33% border in `tone` (category boxes)
+ *  - variant "neutral": soft grey box (reference "Contact Me" / "Webrings")
+ *  - variant "outline": soft grey box with an accent border (reference "The Curatorial")
+ *  - variant "notice":  green announcement box
+ */
+import Icon from './Icon.astro';
+import type { IconName } from '../../types';
+
+interface Props {
+  title?: string;
+  icon?: IconName;
+  description?: string;
+  /** Any CSS colour or var(), used by the "tint" variant. */
+  tone?: string;
+  variant?: 'tint' | 'neutral' | 'outline' | 'notice';
+  wide?: boolean;
+  as?: 'div' | 'section' | 'article';
+  id?: string;
+  class?: string;
+  headingLevel?: 2 | 3;
+}
+
+const {
+  title, icon, description, tone = 'var(--accent-color)', variant = 'tint', wide = false,
+  as: Tag = 'div', id, class: className, headingLevel = 3,
+} = Astro.props;
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
+---
+<Tag
+  id={id}
+  class:list={['card', `card--${variant}`, { twox: wide }, className]}
+  style={`--tone: ${tone}`}
+>
+  {title && (
+    <Heading class="card__title">
+      {icon && <Icon name={icon} />}{title}
+    </Heading>
+  )}
+  {description && <p class="card__desc">{description}</p>}
+  <slot />
+</Tag>
+
+<style>
+  .card {
+    border-radius: var(--radius);
+    padding: 5px 8px 10px;
+    min-width: 0;
+  }
+  .card--tint {
+    background-color: color-mix(in srgb, var(--tone) 7%, var(--background-color));
+    border: 1px solid color-mix(in srgb, var(--tone) 33%, var(--background-color));
+  }
+  .card--neutral {
+    background-color: color-mix(in srgb, var(--light-background-color) 50%, var(--background-color));
+  }
+  .card--outline {
+    background-color: color-mix(in srgb, var(--light-background-color) 50%, var(--background-color));
+    border: 1px solid color-mix(in srgb, var(--accent-color) 33%, var(--background-color));
+  }
+  .card--notice {
+    padding: 10px;
+    background-color: color-mix(in srgb, var(--notice-color) 12%, var(--background-color));
+    border: 1.2px solid color-mix(in srgb, var(--notice-color) 30%, var(--background-color));
+  }
+  .card__title {
+    font-size: 1.2em;
+    font-weight: 400;
+    margin: 0;
+    line-height: 1.5;
+  }
+  .card__title :global(.icon) { margin-right: 7px; }
+  .card__desc {
+    font-style: italic;
+    font-size: 0.8em;
+    margin: 0 0 12px;
+  }
+</style>

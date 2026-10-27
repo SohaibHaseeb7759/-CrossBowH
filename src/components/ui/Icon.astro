@@ -1,0 +1,36 @@
+---
+/**
+ * Phosphor icon (the icon family used by the reference design), inlined as SVG at build time.
+ * Only the icons listed in IconName (src/types.ts) are bundled. To add one, add its name to
+ * IconName and to the glob below (names: https://phosphoricons.com).
+ */
+import type { IconName } from '../../types';
+
+interface Props {
+  name: IconName;
+  /** Accessible label. Omit for decorative icons next to visible text. */
+  label?: string;
+  class?: string;
+}
+
+const icons = import.meta.glob<string>(
+  '/node_modules/@phosphor-icons/core/assets/regular/{article,arrow-up-right,briefcase,calendar-dot,certificate,code,envelope,folder,github-logo,globe,hand-waving,house,identification-card,link,linkedin-logo,mastodon-logo,newspaper-clipping,paper-plane-tilt,rss,seal-check,shield-check,star,swatches,tag,terminal-window,user,x-logo,youtube-logo,discord-logo,butterfly,warning-circle,check-circle,info,chat-circle-dots,list-checks,path,target}.svg',
+  { query: '?raw', import: 'default', eager: true },
+);
+
+const { name, label, class: className } = Astro.props;
+const raw = icons[`/node_modules/@phosphor-icons/core/assets/regular/${name}.svg`];
+if (!raw) throw new Error(`Icon "${name}" is not bundled. Add it to the glob in Icon.astro.`);
+const inner = raw.replace(/^<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
+---
+<svg
+  class:list={['icon', className]}
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 256 256"
+  fill="currentColor"
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+  focusable="false"
+  set:html={inner}
+/>

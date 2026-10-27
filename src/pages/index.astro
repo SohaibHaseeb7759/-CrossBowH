@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Intro from '../components/sections/Intro.astro';
+import Spotlight from '../components/sections/Spotlight.astro';
+import About from '../components/sections/About.astro';
+import Projects from '../components/sections/Projects.astro';
+import Blog from '../components/sections/Blog.astro';
+import Contact from '../components/sections/Contact.astro';
+import FinDivider from '../components/ui/FinDivider.astro';
+---
+<BaseLayout>
+  <h1 class="sr-only">#CrossBowH</h1>
+
+  <div class="contain">
+    <Intro />
+    <Spotlight />
+  </div>
+
+  <FinDivider />
+  <div id="about" class="anchor"><About /></div>
+
+  <FinDivider />
+  <div id="projects" class="anchor"><Projects /></div>
+
+  <FinDivider />
+  <div id="blog" class="anchor"><Blog /></div>
+
+  <FinDivider />
+  <div id="contact" class="anchor"><Contact /></div>
+</BaseLayout>

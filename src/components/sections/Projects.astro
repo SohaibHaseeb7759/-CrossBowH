@@ -1,0 +1,36 @@
+---
+import Card from '../ui/Card.astro';
+import ProjectCard from '../ui/ProjectCard.astro';
+import SectionHeading from '../ui/SectionHeading.astro';
+import { projects as allProjects } from '../../data/projects';
+import { visible } from '../../lib/content';
+
+// Featured first, each spanning the full row; the rest pair up, with an odd last card spanning the row.
+const projects = visible(allProjects);
+const featured = projects.filter((p) => p.featured);
+const rest = projects.filter((p) => !p.featured);
+const realCount = projects.filter((p) => !p.placeholder).length;
+---
+<section class="contain section" aria-labelledby="projects-title">
+  <SectionHeading
+    id="projects-title"
+    title="Projects"
+    icon="folder"
+    meta={realCount > 0 ? `${realCount} ${realCount === 1 ? 'project' : 'projects'}` : undefined}
+  />
+
+  {projects.length === 0 ? (
+    <Card variant="neutral" wide>
+      <p class="empty">Projects are being polished and will land here soon. Want to collaborate? <a href="#contact">Get in touch</a>.</p>
+    </Card>
+  ) : (
+    <>
+      {featured.map((p) => <ProjectCard project={p} wide />)}
+      {rest.map((p, i) => <ProjectCard project={p} wide={rest.length % 2 === 1 && i === rest.length - 1} />)}
+    </>
+  )}
+</section>
+
+<style>
+  .empty { margin: 5px 0; font-style: italic; }
+</style>

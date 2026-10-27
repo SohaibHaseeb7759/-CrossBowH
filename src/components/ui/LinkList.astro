@@ -1,0 +1,28 @@
+---
+/** Icon + label list (reference "Contact Me" box). Entries without a URL render as placeholders or are hidden. */
+import Icon from './Icon.astro';
+import { site } from '../../config/site';
+import type { SocialLink } from '../../types';
+interface Props { links: SocialLink[] }
+const links = Astro.props.links.filter((l) => l.url || site.showPlaceholders);
+---
+<ul class="link-list">
+  {links.map((l) => (
+    <li>
+      <Icon name={l.icon} />
+      {l.url ? (
+        <a href={l.url} rel="me noopener" target={l.url.startsWith('mailto:') ? undefined : '_blank'}>{l.label}</a>
+      ) : (
+        <span>{l.label}</span>
+      )}
+      {l.handle && <span class="muted link-list__handle">{l.handle}</span>}
+      {!l.url && <span class="placeholder-flag">add URL</span>}
+    </li>
+  ))}
+</ul>
+<style>
+  .link-list { list-style: none; padding: 0; margin: 8px 0 0; }
+  .link-list li { margin: 3px 0; }
+  .link-list .icon { margin-right: 6px; }
+  .link-list__handle { font-style: italic; font-size: 0.85em; margin-left: 6px; }
+</style>

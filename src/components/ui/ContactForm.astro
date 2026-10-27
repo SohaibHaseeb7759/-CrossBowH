@@ -1,0 +1,205 @@
+---
+/**
+ * Contact form. The site is static, so sending needs an external endpoint
+ * (contact.formEndpoint in src/config/site.ts). Without one, the form validates
+ * input and then says plainly that nothing was sent.
+ */
+import Icon from './Icon.astro';
+import { contact } from '../../config/site';
+const endpoint = contact.formEndpoint;
+---
+<form
+  class="contact-form"
+  novalidate
+  data-contact-form
+  data-endpoint={endpoint}
+  data-extra={JSON.stringify(contact.formExtraFields)}
+  action={endpoint || undefined}
+  method="post"
+>
+  {!endpoint && (
+    <p class="contact-form__notice" id="form-demo-note">
+      <Icon name="info" /> Demo mode: this form checks your input but is not connected to an email service yet, so it cannot send messages.
+    </p>
+  )}
+
+  <div class="field">
+    <label for="cf-name">Name</label>
+    <input id="cf-name" name="name" type="text" autocomplete="name" required maxlength="100" aria-describedby="cf-name-error" />
+    <p class="field__error" id="cf-name-error" aria-live="polite"></p>
+  </div>
+
+  <div class="field">
+    <label for="cf-email">Email</label>
+    <input id="cf-email" name="email" type="email" autocomplete="email" required maxlength="200" aria-describedby="cf-email-error" />
+    <p class="field__error" id="cf-email-error" aria-live="polite"></p>
+  </div>
+
+  <div class="field">
+    <label for="cf-message">Message</label>
+    <textarea id="cf-message" name="message" rows="5" required minlength="10" maxlength="5000" aria-describedby="cf-message-error"></textarea>
+    <p class="field__error" id="cf-message-error" aria-live="polite"></p>
+  </div>
+
+  <!-- Spam trap: real visitors never see or fill this. -->
+  <div class="hp" aria-hidden="true">
+    <label for="cf-website">Website</label>
+    <input id="cf-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <button type="submit" class="contact-form__submit" data-submit>
+    <Icon name="paper-plane-tilt" /> <span data-submit-label>Send message</span>
+  </button>
+
+  <div class="contact-form__status" role="status" aria-live="polite" data-status hidden></div>
+</form>
+
+<style>
+  .contact-form { margin-top: 8px; }
+  .contact-form__notice {
+    font-size: 0.8em;
+    font-style: italic;
+    color: var(--light-font-color);
+    margin-bottom: 12px;
+  }
+  .field { margin-bottom: 10px; }
+  .field label { display: block; font-size: 0.9em; margin-bottom: 3px; }
+  .field input,
+  .field textarea {
+    width: 100%;
+    font: inherit;
+    font-size: 16px;
+    color: var(--font-color);
+    background: var(--background-color);
+    border: 1px solid color-mix(in srgb, var(--light-font-color) 35%, var(--background-color));
+    border-radius: var(--radius);
+    padding: 8px 10px;
+    transition: border-color 0.15s ease;
+  }
+  .field textarea { resize: vertical; min-height: 120px; }
+  .field input:focus,
+  .field textarea:focus { outline: none; border-color: var(--accent-color); }
+  .field [aria-invalid='true'] { border-color: #e5484d; }
+  .field__error { min-height: 0; margin: 3px 0 0; font-size: 0.8em; color: #ff8a8a; }
+  .field__error:empty { display: none; }
+  :global([data-theme='light']) .field__error { color: #b00020; }
+
+  .hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+
+  .contact-form__submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font: inherit;
+    font-size: 0.95em;
+    color: var(--contrast-font-color);
+    background: color-mix(in srgb, var(--accent-color) 10%, var(--background-color));
+    border: 1px solid color-mix(in srgb, var(--accent-color) 45%, var(--background-color));
+    border-radius: var(--radius);
+    padding: 6px 14px;
+    min-height: 44px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+  .contact-form__submit:hover { color: var(--link-hover-color); border-color: var(--accent-color); }
+  .contact-form__submit:disabled { opacity: 0.6; cursor: progress; }
+
+  .contact-form__status {
+    margin-top: 12px;
+    padding: 8px 10px;
+    border-radius: var(--radius);
+    font-size: 0.9em;
+    border: 1px solid;
+  }
+  .contact-form__status[data-kind='success'] {
+    border-color: color-mix(in srgb, var(--notice-color) 50%, var(--background-color));
+    background: color-mix(in srgb, var(--notice-color) 12%, var(--background-color));
+  }
+  .contact-form__status[data-kind='info'] {
+    border-color: color-mix(in srgb, var(--tone-notes) 45%, var(--background-color));
+    background: color-mix(in srgb, var(--tone-notes) 8%, var(--background-color));
+  }
+  .contact-form__status[data-kind='error'] {
+    border-color: color-mix(in srgb, #e5484d 55%, var(--background-color));
+    background: color-mix(in srgb, #e5484d 10%, var(--background-color));
+  }
+</style>
+
+<script>
+  const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  document.querySelectorAll<HTMLFormElement>('[data-contact-form]').forEach((form) => {
+    const endpoint = form.dataset.endpoint ?? '';
+    const extra = JSON.parse(form.dataset.extra || '{}') as Record<string, string>;
+    const status = form.querySelector<HTMLElement>('[data-status]')!;
+    const submit = form.querySelector<HTMLButtonElement>('[data-submit]')!;
+    const submitLabel = form.querySelector<HTMLElement>('[data-submit-label]')!;
+    const field = (name: string) => form.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement;
+
+    const rules: Record<string, (v: string) => string> = {
+      name: (v) => (v.trim().length < 2 ? 'Please enter your name.' : ''),
+      email: (v) => (!v.trim() ? 'Please enter your email address.' : !EMAIL.test(v.trim()) ? 'That email address doesn’t look right.' : ''),
+      message: (v) => (v.trim().length < 10 ? 'Please write at least 10 characters.' : ''),
+    };
+
+    const check = (name: string) => {
+      const el = field(name);
+      const msg = rules[name](el.value);
+      el.setAttribute('aria-invalid', String(Boolean(msg)));
+      const err = form.querySelector<HTMLElement>(`#cf-${name}-error`);
+      if (err) err.textContent = msg;
+      return !msg;
+    };
+
+    Object.keys(rules).forEach((name) =>
+      field(name).addEventListener('blur', () => field(name).value && check(name)),
+    );
+
+    const show = (kind: 'success' | 'info' | 'error', text: string) => {
+      status.dataset.kind = kind;
+      status.textContent = text;
+      status.hidden = false;
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      status.hidden = true;
+      const results = Object.keys(rules).map(check);
+      if (results.includes(false)) {
+        const first = Object.keys(rules).find((n) => field(n).getAttribute('aria-invalid') === 'true');
+        if (first) field(first).focus();
+        return;
+      }
+      if (field('website').value) return; // bot
+
+      if (!endpoint) {
+        show('info', 'Your message passed validation, but it was NOT sent: this form is not connected to an email service yet. Please use one of the contact links instead.');
+        return;
+      }
+
+      submit.disabled = true;
+      submitLabel.textContent = 'Sending…';
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            ...extra,
+            name: field('name').value.trim(),
+            email: field('email').value.trim(),
+            message: field('message').value.trim(),
+          }),
+        });
+        if (!res.ok) throw new Error(String(res.status));
+        form.reset();
+        Object.keys(rules).forEach((n) => field(n).removeAttribute('aria-invalid'));
+        show('success', 'Thanks! Your message was sent. I’ll get back to you soon.');
+      } catch {
+        show('error', 'Sorry, your message could not be sent. Nothing was delivered — please try again later or use one of the contact links.');
+      } finally {
+        submit.disabled = false;
+        submitLabel.textContent = 'Send message';
+      }
+    });
+  });
+</script>
